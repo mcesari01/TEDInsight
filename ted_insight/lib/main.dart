@@ -47,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _getPopularTags();
   }
 
+// getPopularTags
   Future<void> _getPopularTags() async {
     try {
       final tags = await getPopularTags();
