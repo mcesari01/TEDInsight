@@ -3,15 +3,12 @@ import 'dart:convert';
 import 'models/talk.dart';
 
 Future<List<Talk>> initEmptyList() async {
-
   Iterable list = json.decode("[]");
-  var talks = list.map((model) => Talk.fromJSON(model)).toList();
-  return talks;
-
+  return list.map((model) => Talk.fromJSON(model)).toList();
 }
 
 Future<List<Talk>> getTalksByTag(String tag, int page) async {
-  var url = Uri.parse('https://sczcsatbhb.execute-api.us-east-1.amazonaws.com/default/Get_Talks_By_Tag');
+  var url = Uri.parse('https://q7m2ipxw7h.execute-api.us-east-1.amazonaws.com/default/Get_Talks_By_ID');
 
   final http.Response response = await http.post(url,
     headers: <String, String>{
@@ -23,6 +20,7 @@ Future<List<Talk>> getTalksByTag(String tag, int page) async {
       'doc_per_page': 6
     }),
   );
+
   if (response.statusCode == 200) {
     final body = utf8.decode(response.bodyBytes);
     final List<dynamic> jsonList = json.decode(body);
@@ -30,5 +28,16 @@ Future<List<Talk>> getTalksByTag(String tag, int page) async {
   } else {
     throw Exception('Failed to load talks');
   }
-      
+}
+
+Future<List<String>> getPopularTags() async {
+  const String url = 'https://r7d06nbt1d.execute-api.us-east-1.amazonaws.com/default/Get_Popular_Tags'; // Inserisci il tuo URL qui
+
+  final http.Response response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonList = json.decode(response.body);
+    return jsonList.map((tagObj) => tagObj['tag'].toString()).toList();
+  } else {
+    throw Exception('Failed to load popular tags');
+  }
 }
