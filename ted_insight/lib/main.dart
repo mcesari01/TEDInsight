@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
 import 'talk_repository.dart';
 import 'models/talk.dart';
 
@@ -15,7 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'MyTEDx',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.deepOrange,
       ),
       home: const MyHomePage(),
     );
@@ -47,7 +44,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _getPopularTags();
   }
 
-// getPopularTags
   Future<void> _getPopularTags() async {
     try {
       final tags = await getPopularTags();
@@ -104,6 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(title: const Text('TED Insight')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -111,28 +108,55 @@ class _MyHomePageState extends State<MyHomePage> {
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  TextField(
+                  TextFormField(
                     controller: _controller,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your favorite talk',
+                    decoration: InputDecoration(
+                      hintText: 'Search TED Talks by tag',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.red.shade50,
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: _controller.text.trim().isEmpty ? null : _getTalksByTag,
-                    child: const Text('Search by tag'),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _controller.text.trim().isEmpty ? null : _getTalksByTag,
+                      icon: Icon(Icons.search),
+                      label: const Text('Search'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepOrange,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 24),
                   if (_isLoadingTags)
-                    const CircularProgressIndicator()
-                  else if (_popularTags.isNotEmpty)
-                      Wrap(
+                    const Padding(
+                      padding: EdgeInsets.only(top: 24),
+                      child: CircularProgressIndicator(),
+                    )
+                  else if (_popularTags.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Popular Tags:",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
                       spacing: 8.0,
                       runSpacing: 4.0,
                       children: _popularTags.map((tag) {
                         return ActionChip(
                           label: Text(tag),
+                          backgroundColor: Colors.deepOrange.shade100,
                           onPressed: () {
                             _controller.text = tag;
                             _getTalksByTag();
@@ -140,8 +164,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         );
                       }).toList(),
                     )
-                  else
-                  const SizedBox(), 
+                  ] else
+                    const Padding(
+                      padding: EdgeInsets.only(top: 24),
+                      child: Text('No popular tags found'),
+                    ),
                 ],
               )
             : isLoading && _allTalks.isEmpty
@@ -160,23 +187,26 @@ class _MyHomePageState extends State<MyHomePage> {
                               itemCount: _allTalks.length,
                               itemBuilder: (context, index) {
                                 final talk = _allTalks[index];
-                                final isEven = index % 2 == 0;
 
-                                return Container(
-                                  color: isEven ? Colors.white : Colors.red.shade50,
+                                return Card(
+                                  elevation: 2,
+                                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                                   child: ListTile(
                                     subtitle: Text(talk.mainSpeaker),
                                     title: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(talk.title),
+                                        Text(
+                                          talk.title,
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
                                         const SizedBox(height: 4),
                                         Wrap(
                                           spacing: 6,
                                           children: talk.keyPhrases.map((k) {
                                             return Chip(
                                               label: Text(k, style: const TextStyle(fontSize: 12)),
-                                              backgroundColor: Colors.red.shade100,
+                                              backgroundColor: Colors.orange.shade100,
                                             );
                                           }).toList(),
                                         ),
