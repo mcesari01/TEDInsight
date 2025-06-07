@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'talk_repository.dart';
 import 'models/talk.dart';
+import 'thematic_path_screen.dart';
 
 void main() => runApp(const MyApp());
 
@@ -112,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: 'Search TED Talks by tag',
-                      prefixIcon: Icon(Icons.search),
+                      prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
                       fillColor: Colors.red.shade50,
@@ -124,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _controller.text.trim().isEmpty ? null : _getTalksByTag,
-                      icon: Icon(Icons.search),
+                      icon: const Icon(Icons.search),
                       label: const Text('Search'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepOrange,
@@ -135,12 +136,23 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                   ),
-                  if (_isLoadingTags)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 24),
-                      child: CircularProgressIndicator(),
-                    )
-                  else if (_popularTags.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.school),
+                      label: const Text('Percorsi Tematici Guidati'),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ThematicPathScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  if (_popularTags.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     const Align(
                       alignment: Alignment.centerLeft,
@@ -187,7 +199,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               itemCount: _allTalks.length,
                               itemBuilder: (context, index) {
                                 final talk = _allTalks[index];
-
                                 return Card(
                                   elevation: 2,
                                   margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
