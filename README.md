@@ -100,8 +100,11 @@
 ## 👨‍💻 Authors
 
 Matteo Cesari and Davide Girolamo
+
 University of Bergamo
+
 Master’s in Computer Engineering
+
 Cloud & Mobile Technologies ·  2024/2025
 
 ---
