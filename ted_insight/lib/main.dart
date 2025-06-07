@@ -11,9 +11,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MyTEDx',
+      title: 'TED Insight',
       theme: ThemeData(
-        primarySwatch: Colors.deepOrange,
+        fontFamily: 'Roboto',
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        useMaterial3: true,
+        scaffoldBackgroundColor: Colors.grey.shade50,
       ),
       home: const MyHomePage(),
     );
@@ -101,10 +104,16 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(title: const Text('TED Insight')),
+      appBar: AppBar(
+        title: const Text(
+          'TED Insight',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+        ),
+        centerTitle: true,
+        elevation: 2,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(12.0),
         child: init
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -112,11 +121,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   TextFormField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      hintText: 'Search TED Talks by tag',
+                      hintText: 'Esplora per argomento (es. innovation)',
                       prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       filled: true,
-                      fillColor: Colors.red.shade50,
+                      fillColor: Colors.white,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.deepOrange, width: 2),
+                      ),
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
@@ -126,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: ElevatedButton.icon(
                       onPressed: _controller.text.trim().isEmpty ? null : _getTalksByTag,
                       icon: const Icon(Icons.search),
-                      label: const Text('Search'),
+                      label: const Text('Cerca Talk'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepOrange,
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -157,8 +171,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Popular Tags:",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        'Tag più popolari:',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -170,6 +184,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           label: Text(tag),
                           backgroundColor: Colors.deepOrange.shade100,
                           onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Filtra per: $tag')),
+                            );
                             _controller.text = tag;
                             _getTalksByTag();
                           },
@@ -179,14 +196,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   ] else
                     const Padding(
                       padding: EdgeInsets.only(top: 24),
-                      child: Text('No popular tags found'),
+                      child: Text('Nessun tag disponibile.'),
                     ),
                 ],
               )
             : isLoading && _allTalks.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : _allTalks.isEmpty
-                    ? const Center(child: Text("No talks found for this tag."))
+                    ? const Center(child: Text("Nessun talk trovato."))
                     : Column(
                         children: [
                           Text(
