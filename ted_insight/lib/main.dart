@@ -13,26 +13,82 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TED Insight',
       theme: ThemeData(
+        brightness: Brightness.light,
         fontFamily: 'Roboto',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.grey.shade50,
       ),
-      home: const MyHomePage(),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        fontFamily: 'Roboto',
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange, brightness: Brightness.dark),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.system,
+      home: const RootScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, this.title = 'TED Insight'});
-
-  final String title;
+class RootScreen extends StatefulWidget {
+  const RootScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<RootScreen> createState() => _RootScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _RootScreenState extends State<RootScreen> {
+  int _selectedIndex = 0;
+
+  static const List<Widget> _pages = <Widget>[
+    ExploreScreen(),
+    ThematicPathScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (child, animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        child: _pages[_selectedIndex],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.deepOrange,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Esplora',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.school),
+            label: 'Percorsi',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ExploreScreen extends StatefulWidget {
+  const ExploreScreen({super.key});
+
+  @override
+  State<ExploreScreen> createState() => _ExploreScreenState();
+}
+
+class _ExploreScreenState extends State<ExploreScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<Talk> _allTalks = [];
   List<String> _popularTags = [];
@@ -101,10 +157,27 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _resetSearch() {
+    setState(() {
+      init = true;
+      page = 1;
+      _controller.clear();
+      _allTalks.clear();
+      hasMore = true;
+      isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: !init
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: _resetSearch,
+              )
+            : null,
         title: const Text(
           'TED Insight',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
@@ -151,23 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.school),
-                      label: const Text('Percorsi Tematici Guidati'),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ThematicPathScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
                   if (_popularTags.isNotEmpty) ...[
-                    const SizedBox(height: 20),
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -182,7 +239,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: _popularTags.map((tag) {
                         return ActionChip(
                           label: Text(tag),
-                          backgroundColor: Colors.deepOrange.shade100,
+                          backgroundColor: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.deepOrange.shade300
+                              : Colors.deepOrange.shade100,
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Filtra per: $tag')),
@@ -203,12 +262,26 @@ class _MyHomePageState extends State<MyHomePage> {
             : isLoading && _allTalks.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : _allTalks.isEmpty
-                    ? const Center(child: Text("Nessun talk trovato."))
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("Nessun talk trovato."),
+                          const SizedBox(height: 12),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.arrow_back),
+                            label: const Text("Torna indietro"),
+                            onPressed: _resetSearch,
+                          ),
+                        ],
+                      )
                     : Column(
                         children: [
-                          Text(
-                            "#${_controller.text}",
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              "#${_controller.text}",
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Expanded(
@@ -255,33 +328,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                         ],
                       ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: (!init && hasMore && !isLoading)
-          ? FloatingActionButton(
-              child: const Icon(Icons.arrow_drop_down),
-              onPressed: _loadMoreTalks,
-            )
-          : null,
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.home),
-              onPressed: () {
-                setState(() {
-                  init = true;
-                  page = 1;
-                  _controller.clear();
-                  _allTalks.clear();
-                  hasMore = true;
-                  isLoading = false;
-                });
-              },
-            ),
-          ],
-        ),
       ),
     );
   }
