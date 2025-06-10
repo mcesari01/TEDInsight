@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'talk_repository.dart';
 import 'models/talk.dart';
 import 'thematic_path_screen.dart';
+import 'favorites_screen.dart';
 
 void main() => runApp(const MyApp());
 
@@ -40,11 +41,31 @@ class RootScreen extends StatefulWidget {
 
 class _RootScreenState extends State<RootScreen> {
   int _selectedIndex = 0;
+  List<Talk> _favoriteTalks = [];
+  late List<Widget> _pages;
 
-  static const List<Widget> _pages = <Widget>[
-    ExploreScreen(),
-    ThematicPathScreen(),
-  ];
+  void _toggleFavorite(Talk talk) {
+    setState(() {
+      if (_favoriteTalks.any((t) => t.title == talk.title)) {
+        _favoriteTalks.removeWhere((t) => t.title == talk.title);
+      } else {
+        _favoriteTalks.add(talk);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      ExploreScreen(
+        onToggleFavorite: _toggleFavorite,
+        favorites: _favoriteTalks,
+      ),
+      const ThematicPathScreen(),
+      FavoritesScreen(favorites: _favoriteTalks),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -75,6 +96,10 @@ class _RootScreenState extends State<RootScreen> {
             icon: Icon(Icons.school),
             label: 'Percorsi',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Preferiti',
+          ),
         ],
       ),
     );
@@ -82,7 +107,14 @@ class _RootScreenState extends State<RootScreen> {
 }
 
 class ExploreScreen extends StatefulWidget {
-  const ExploreScreen({super.key});
+  final Function(Talk) onToggleFavorite;
+  final List<Talk> favorites;
+
+  const ExploreScreen({
+    super.key,
+    required this.onToggleFavorite,
+    required this.favorites,
+  });
 
   @override
   State<ExploreScreen> createState() => _ExploreScreenState();
@@ -166,6 +198,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
       hasMore = true;
       isLoading = false;
     });
+  }
+
+  bool _isFavorite(Talk talk) {
+    return widget.favorites.any((t) => t.title == talk.title);
   }
 
   @override
@@ -289,6 +325,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               itemCount: _allTalks.length,
                               itemBuilder: (context, index) {
                                 final talk = _allTalks[index];
+                                final isFav = _isFavorite(talk);
                                 return Card(
                                   elevation: 2,
                                   margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
@@ -312,6 +349,22 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                           }).toList(),
                                         ),
                                       ],
+                                    ),
+                                    trailing: IconButton(
+                                      onPressed: () {
+                                      widget.onToggleFavorite(talk);
+                                      setState(() {}); 
+                                    },
+                                      icon: AnimatedSwitcher(
+                                        duration: const Duration(milliseconds: 300),
+                                        transitionBuilder: (child, animation) =>
+                                            ScaleTransition(scale: animation, child: child),
+                                        child: Icon(
+                                          isFav ? Icons.favorite : Icons.favorite_border,
+                                          key: ValueKey<bool>(isFav),
+                                          color: isFav ? Colors.red : null,
+                                        ),
+                                      ),
                                     ),
                                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text(talk.details)),
