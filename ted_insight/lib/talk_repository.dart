@@ -8,7 +8,7 @@ Future<List<Talk>> initEmptyList() async {
 }
 
 Future<List<Talk>> getTalksByTag(String tag, int page) async {
-  var url = Uri.parse('https://sczcsatbhb.execute-api.us-east-1.amazonaws.com/default/Get_Talks_By_Tag');
+  var url = Uri.parse('https://q7m2ipxw7h.execute-api.us-east-1.amazonaws.com/default/Get_Talks_By_ID');
 
   final http.Response response = await http.post(url,
     headers: <String, String>{

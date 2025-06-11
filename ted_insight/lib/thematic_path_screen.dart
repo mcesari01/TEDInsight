@@ -3,13 +3,23 @@ import 'talk_repository.dart';
 import 'models/talk.dart';
 
 class ThematicPathScreen extends StatefulWidget {
-  const ThematicPathScreen({super.key});
+  final Function(Talk) onToggleFavorite;
+  final List<Talk> favorites;
+
+  const ThematicPathScreen({
+    super.key,
+    required this.onToggleFavorite,
+    required this.favorites,
+  });
 
   @override
   State<ThematicPathScreen> createState() => _ThematicPathScreenState();
 }
 
 class _ThematicPathScreenState extends State<ThematicPathScreen> {
+  bool _isFavorite(Talk talk) {
+    return widget.favorites.any((t) => t.title == talk.title);
+  }
   final TextEditingController _controller = TextEditingController();
   int _maxDuration = 250;
   bool isLoading = false;
@@ -63,11 +73,11 @@ class _ThematicPathScreenState extends State<ThematicPathScreen> {
               value: _maxDuration.toDouble(),
               min: 60,
               max: 600,
-              divisions: 23,
+              divisions: 54,
               label: '$_maxDuration min',
               onChanged: (val) {
                 setState(() {
-                  _maxDuration = val.toInt();
+                  _maxDuration = (val / 10).round() * 10;
                 });
               },
             ),
@@ -102,12 +112,27 @@ class _ThematicPathScreenState extends State<ThematicPathScreen> {
                               spacing: 6,
                               children: talk.keyPhrases
                                   .map((k) => Chip(
-                                        label: Text(k,
-                                            style: const TextStyle(fontSize: 12)),
+                                        label: Text(k, style: const TextStyle(fontSize: 12)),
                                       ))
                                   .toList(),
                             )
                           ],
+                        ),
+                        trailing: IconButton(
+                          onPressed: () {
+                            widget.onToggleFavorite(talk);
+                            setState(() {});
+                          },
+                          icon: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (child, animation) =>
+                                ScaleTransition(scale: animation, child: child),
+                            child: Icon(
+                              _isFavorite(talk) ? Icons.favorite : Icons.favorite_border,
+                              key: ValueKey<bool>(_isFavorite(talk)),
+                              color: _isFavorite(talk) ? Colors.red : null,
+                            ),
+                          ),
                         ),
                         onTap: () => ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(talk.details)),

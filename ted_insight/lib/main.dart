@@ -62,7 +62,10 @@ class _RootScreenState extends State<RootScreen> {
         onToggleFavorite: _toggleFavorite,
         favorites: _favoriteTalks,
       ),
-      const ThematicPathScreen(),
+      ThematicPathScreen(
+        onToggleFavorite: _toggleFavorite,
+        favorites: _favoriteTalks,
+      ),
       FavoritesScreen(favorites: _favoriteTalks),
     ];
   }
@@ -236,7 +239,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Colors.transparent,
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.deepOrange, width: 2),
                       ),
@@ -274,7 +277,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       runSpacing: 4.0,
                       children: _popularTags.map((tag) {
                         return ActionChip(
-                          label: Text(tag),
+                          label: Text(tag, style: TextStyle(color: Colors.black)),
                           backgroundColor: Theme.of(context).brightness == Brightness.dark
                               ? Colors.deepOrange.shade300
                               : Colors.deepOrange.shade100,
@@ -344,7 +347,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                           children: talk.keyPhrases.map((k) {
                                             return Chip(
                                               label: Text(k, style: const TextStyle(fontSize: 12)),
-                                              backgroundColor: Colors.orange.shade100,
+                                              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                                              ? Colors.deepOrange.shade300
+                                              : Colors.deepOrange.shade100,
                                             );
                                           }).toList(),
                                         ),
