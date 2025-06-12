@@ -11,7 +11,7 @@ class ThematicPathScreen extends StatefulWidget {
     required this.onToggleFavorite,
     required this.favorites,
   });
-
+  
   @override
   State<ThematicPathScreen> createState() => _ThematicPathScreenState();
 }

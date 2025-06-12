@@ -4,6 +4,7 @@ import 'models/talk.dart';
 import 'thematic_path_screen.dart';
 import 'favorites_screen.dart';
 
+
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
