@@ -91,10 +91,17 @@
 ---
 
 ## 🔮 Future Improvements
+
 	•	Cloud-based user login and favorite synchronization.
 	•	Smart push notifications for new relevant talks.
 	•	Trend dashboards for institutional use (e.g., universities or companies).
 	•	Sharing TED Talks via social media or links.
+---
+
+## 📋 Trello Board
+
+https://trello.com/b/JMjFr4ZO/tedinsight
+
 ---
 
 ## 👨‍💻 Authors
